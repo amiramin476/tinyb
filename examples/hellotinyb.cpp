@@ -58,6 +58,7 @@ void signal_handler(int signum)
  */
 int main(int argc, char **argv)
 {
+	std::cout << "Hello from tinyb\n";
     if (argc < 2) {
         std::cerr << "Run as: " << argv[0] << " <device_address>" << std::endl;
         exit(1);
@@ -132,14 +133,14 @@ int main(int argc, char **argv)
             std::cout << std::endl;
 
             /* Search for the temperature service, by UUID */
-            if ((*it)->get_uuid() == "f000aa00-0451-4000-b000-000000000000")
+            if ((*it)->get_uuid() == "6e400001-b5a3-f393-e0a9-e50e24dcca9e")
                 temperature_service = (*it).release();
         }
         break;
     }
 
     if (temperature_service == nullptr) {
-        std::cout << "Could not find service f000aa00-0451-4000-b000-000000000000" << std::endl;
+        std::cout << "Could not find service 6e400001-b5a3-f393-e0a9-e50e24dcca9e" << std::endl;
         return 1;
     }
 
@@ -159,24 +160,25 @@ int main(int argc, char **argv)
         std::cout << "Service = " << (*it)->get_service().get_object_path() << " ";
         std::cout << std::endl;
 
-        if ((*it)->get_uuid() == "f000aa01-0451-4000-b000-000000000000")
+        if ((*it)->get_uuid() == "6e400003-b5a3-f393-e0a9-e50e24dcca9e")
             temp_value = (*it).release();
-        else if ((*it)->get_uuid() =="f000aa02-0451-4000-b000-000000000000")
+        else if ((*it)->get_uuid() =="6e400002-b5a3-f393-e0a9-e50e24dcca9e")
             temp_config = (*it).release();
-        else if ((*it)->get_uuid() == "f000aa03-0451-4000-b000-000000000000")
-            temp_period = (*it).release();
+        /*else if ((*it)->get_uuid() == "f000aa03-0451-4000-b000-000000000000")
+            temp_period = (*it).release();*/
     }
 
-    if (temp_config == nullptr || temp_value == nullptr || temp_period == nullptr) {
+    if (temp_config == nullptr || temp_value == nullptr /*|| temp_period == nullptr */) {
         std::cout << "Could not find characteristics." << std::endl;
         return 1;
     }
 
     /* Activate the temperature measurements */
     try {
-        std::vector<unsigned char> config_on {0x01};
+        std::vector<unsigned char> config_on {0x00, 0x05}; //read version string command
         temp_config->write_value(config_on);
-        while (running) {
+        //while (running) 
+        {
             /* Read temperature data and display it */
             std::vector<unsigned char> response = temp_value->read_value();
             unsigned char *data;
@@ -189,16 +191,16 @@ int main(int argc, char **argv)
                     std::cout << std::hex << static_cast<int>(data[i]) << ", ";
                 std::cout << "] ";
 
-                uint16_t ambient_temp, object_temp;
+                /*uint16_t ambient_temp, object_temp;
                 object_temp = data[0] | (data[1] << 8);
                 ambient_temp = data[2] | (data[3] << 8);
 
                 std::cout << "Ambient temp: " << celsius_temp(ambient_temp) << "C ";
-                std::cout << "Object temp: " << celsius_temp(object_temp) << "C ";
+                std::cout << "Object temp: " << celsius_temp(object_temp) << "C "; */
                 std::cout << std::endl;
             }
 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            //std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     } catch (std::exception &e) {
         std::cout << "Error: " << e.what() << std::endl;
