@@ -59,10 +59,6 @@ void signal_handler(int signum)
 int main(int argc, char **argv)
 {
 	std::cout << "Hello from tinyb\n";
-    if (argc < 2) {
-        std::cerr << "Run as: " << argv[0] << " <device_address>" << std::endl;
-        exit(1);
-    }
 
    BluetoothManager *manager = nullptr;
     try {
@@ -90,11 +86,14 @@ int main(int argc, char **argv)
             std::cout << "Path = " << (*it)->get_object_path() << " ";
             std::cout << "Name = " << (*it)->get_name() << " ";
             std::cout << "Connected = " << (*it)->get_connected() << " ";
+            std::cout << "RSSI = " << (*it)->get_rssi() << " ";
             std::cout << std::endl;
 
             /* Search for the device with the address given as a parameter to the program */
-            if ((*it)->get_address() == argv[1])
+            if ((*it)->get_name() == "Intech_BLE")
+            {
                 sensor_tag = (*it).release();
+			}
         }
 
         /* Free the list of devices and stop if the device was found */
@@ -113,72 +112,81 @@ int main(int argc, char **argv)
         std::cout << "Could not find device " << argv[1] << std::endl;
         return 1;
     }
-
-    /* Connect to the device and get the list of services exposed by it */
-    sensor_tag->connect();
-    std::cout << "Discovered services: " << std::endl;
-    while (true) {
-        /* Wait for the device to come online */
-        std::this_thread::sleep_for(std::chrono::seconds(4));
-
-        auto list = sensor_tag->get_services();
-        if (list.empty())
-            continue;
-
-        for (auto it = list.begin(); it != list.end(); ++it) {
-            std::cout << "Class = " << (*it)->get_class_name() << " ";
-            std::cout << "Path = " << (*it)->get_object_path() << " ";
-            std::cout << "UUID = " << (*it)->get_uuid() << " ";
-            std::cout << "Device = " << (*it)->get_device().get_object_path() << " ";
-            std::cout << std::endl;
-
-            /* Search for the temperature service, by UUID */
-            if ((*it)->get_uuid() == "6e400001-b5a3-f393-e0a9-e50e24dcca9e")
-                temperature_service = (*it).release();
-        }
-        break;
-    }
-
-    if (temperature_service == nullptr) {
-        std::cout << "Could not find service 6e400001-b5a3-f393-e0a9-e50e24dcca9e" << std::endl;
-        return 1;
-    }
-
+    
+    int discovered = 0;
     BluetoothGattCharacteristic *temp_value = nullptr;
     BluetoothGattCharacteristic *temp_config = nullptr;
-    BluetoothGattCharacteristic *temp_period = nullptr;
+    //BluetoothGattCharacteristic *temp_period = nullptr;
+    
+    while (running)
+    {
+		
+		std::cout << "RSSI = " << sensor_tag->get_rssi() << std::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    /* If there is a temperature service on the device with the given UUID,
-     * get it's characteristics, by UUID again */
-    auto list = temperature_service->get_characteristics();
-    std::cout << "Discovered characteristics: " << std::endl;
-    for (auto it = list.begin(); it != list.end(); ++it) {
+		/* Connect to the device and get the list of services exposed by it */
+		sensor_tag->connect();
+		
+		if (discovered == 0)
+		{
+			std::cout << "Discovered services: " << std::endl;
+			while (true) {
+				/* Wait for the device to come online */
+				std::this_thread::sleep_for(std::chrono::seconds(4));
 
-        std::cout << "Class = " << (*it)->get_class_name() << " ";
-        std::cout << "Path = " << (*it)->get_object_path() << " ";
-        std::cout << "UUID = " << (*it)->get_uuid() << " ";
-        std::cout << "Service = " << (*it)->get_service().get_object_path() << " ";
-        std::cout << std::endl;
+				auto list = sensor_tag->get_services();
+				if (list.empty())
+					continue;
 
-        if ((*it)->get_uuid() == "6e400003-b5a3-f393-e0a9-e50e24dcca9e")
-            temp_value = (*it).release();
-        else if ((*it)->get_uuid() =="6e400002-b5a3-f393-e0a9-e50e24dcca9e")
-            temp_config = (*it).release();
-        /*else if ((*it)->get_uuid() == "f000aa03-0451-4000-b000-000000000000")
-            temp_period = (*it).release();*/
-    }
+				for (auto it = list.begin(); it != list.end(); ++it) {
+					std::cout << "Class = " << (*it)->get_class_name() << " ";
+					std::cout << "Path = " << (*it)->get_object_path() << " ";
+					std::cout << "UUID = " << (*it)->get_uuid() << " ";
+					std::cout << "Device = " << (*it)->get_device().get_object_path() << " ";
+					std::cout << std::endl;
 
-    if (temp_config == nullptr || temp_value == nullptr /*|| temp_period == nullptr */) {
-        std::cout << "Could not find characteristics." << std::endl;
-        return 1;
-    }
+					/* Search for the temperature service, by UUID */
+					if ((*it)->get_uuid() == "77880001-b5a3-f393-e0a9-150e24fcca8e")
+						temperature_service = (*it).release();
+				}
+				break;
+			}
 
-    /* Activate the temperature measurements */
-    try {
-        std::vector<unsigned char> config_on {0x00, 0x05}; //read version string command
-        temp_config->write_value(config_on);
-        //while (running) 
-        {
+			if (temperature_service == nullptr) {
+				std::cout << "Could not find service 77880001-b5a3-f393-e0a9-150e24fcca8e" << std::endl;
+				return 1;
+			}
+
+
+			/* If there is a temperature service on the device with the given UUID,
+			 * get it's characteristics, by UUID again */
+			auto list = temperature_service->get_characteristics();
+			std::cout << "Discovered characteristics: " << std::endl;
+			for (auto it = list.begin(); it != list.end(); ++it) {
+
+				std::cout << "Class = " << (*it)->get_class_name() << " ";
+				std::cout << "Path = " << (*it)->get_object_path() << " ";
+				std::cout << "UUID = " << (*it)->get_uuid() << " ";
+				std::cout << "Service = " << (*it)->get_service().get_object_path() << " ";
+				std::cout << std::endl;
+
+				if ((*it)->get_uuid() == "77880003-b5a3-f393-e0a9-150e24fcca8e")
+					temp_value = (*it).release();
+				else if ((*it)->get_uuid() =="77880002-b5a3-f393-e0a9-150e24fcca8e")
+					temp_config = (*it).release();
+				/*else if ((*it)->get_uuid() == "f000aa03-0451-4000-b000-000000000000")
+					temp_period = (*it).release();*/
+			}
+
+			if (temp_config == nullptr || temp_value == nullptr /*|| temp_period == nullptr */) {
+				std::cout << "Could not find characteristics." << std::endl;
+				return 1;
+			}
+			
+			discovered = 1;
+		}
+
+		try {
             /* Read temperature data and display it */
             std::vector<unsigned char> response = temp_value->read_value();
             unsigned char *data;
@@ -186,10 +194,11 @@ int main(int argc, char **argv)
             if (size > 0) {
                 data = response.data();
 
-                std::cout << "Raw data=[";
+                /*std::cout << "Raw data=[";
                 for (unsigned i = 0; i < response.size(); i++)
                     std::cout << std::hex << static_cast<int>(data[i]) << ", ";
-                std::cout << "] ";
+                std::cout << "] " << std:: dec;*/
+
 
                 /*uint16_t ambient_temp, object_temp;
                 object_temp = data[0] | (data[1] << 8);
@@ -198,19 +207,31 @@ int main(int argc, char **argv)
                 std::cout << "Ambient temp: " << celsius_temp(ambient_temp) << "C ";
                 std::cout << "Object temp: " << celsius_temp(object_temp) << "C "; */
                 std::cout << std::endl;
+                int b0 = static_cast<int>(data[0]); 
+                int b1 = static_cast<int>(data[1]);
+                
+                //std::cout << b0 << " " << b1;
+
+                std::cout << "Heart beat: " << (b0 + (b1 << 8)) << std::endl;
+
+                
             }
 
-            //std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    } catch (std::exception &e) {
-        std::cout << "Error: " << e.what() << std::endl;
-    }
+        
+		} 
+		catch (std::exception &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+		}
 
-    /* Disconnect from the device */
-     try {
-        sensor_tag->disconnect();
-    } catch (std::exception &e) {
-        std::cout << "Error: " << e.what() << std::endl;
-    }
+		/* Disconnect from the device */
+		 try {
+			sensor_tag->disconnect();
+		} catch (std::exception &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+		}
+    
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+
+	}
     return 0;
 }
