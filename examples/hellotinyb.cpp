@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 			if (sensor_tag != nullptr)
 				break;
 			/* If not, wait and try again */
-			std::this_thread::sleep_for(std::chrono::seconds(4));
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 			//std::cout << std::endl;
 		}
 		
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 		std::cout << "RSSI = " << sensor_tag->get_rssi() << " ";
 		std::cout << std::endl;
 				
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 		
 
 		/* Stop the discovery (the device was found or number of tries ran out */
@@ -132,12 +132,18 @@ int main(int argc, char **argv)
 		//BluetoothGattCharacteristic *temp_period = nullptr;
     
 		/* Connect to the device and get the list of services exposed by it */
-		sensor_tag->connect();		
+		
+		try {
+			sensor_tag->connect();		
+		} catch (std::exception &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+			continue;
+		}
 
 		//std::cout << "Discovered services: " << std::endl;
 		while (true) {
 			/* Wait for the device to come online */
-			std::this_thread::sleep_for(std::chrono::seconds(4));
+			//std::this_thread::sleep_for(std::chrono::seconds(4));
 
 			auto list = sensor_tag->get_services();
 			if (list.empty())
