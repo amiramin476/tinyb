@@ -88,9 +88,14 @@ int main(int argc, char **argv)
             std::cout << "Connected = " << (*it)->get_connected() << " ";
             std::cout << "RSSI = " << (*it)->get_rssi() << " ";
             std::cout << std::endl;
-
+            
+            if(argc >= 2)
+            {
+				if ((*it)->get_address() == argv[1])
+					sensor_tag = (*it).release();
+			}
             /* Search for the device with the address given as a parameter to the program */
-            if ((*it)->get_name() == "Intech_BLE")
+            else if ((*it)->get_name() == "Intech_BLE")
             {
                 sensor_tag = (*it).release();
 			}
@@ -213,10 +218,8 @@ int main(int argc, char **argv)
                 //std::cout << b0 << " " << b1;
 
                 std::cout << "Heart beat: " << (b0 + (b1 << 8)) << std::endl;
-
                 
             }
-
         
 		} 
 		catch (std::exception &e) {
