@@ -58,7 +58,7 @@ void signal_handler(int signum)
  */
 int main(int argc, char **argv)
 {
-	std::cout << "Hello from tinyb\n";
+	std::cout << "Intech BLE Sensor demo\n";
 
    BluetoothManager *manager = nullptr;
     try {
@@ -77,6 +77,8 @@ int main(int argc, char **argv)
 
 		BluetoothDevice *sensor_tag = NULL;
 		BluetoothGattService *temperature_service = NULL;
+		
+		std::cout << "Discovering Intech BLE device .... " << std::endl;
 
 		//wait indefinitely for the device
 		while (true) { 
@@ -113,11 +115,7 @@ int main(int argc, char **argv)
 			//std::cout << std::endl;
 		}
 		
-		std::cout << "Found device Name = " << sensor_tag->get_name() << " ";
-		std::cout << "Address = " << sensor_tag->get_address() << " ";
-		std::cout << "Connected = " << sensor_tag->get_connected() << " ";
-		std::cout << "RSSI = " << sensor_tag->get_rssi() << " ";
-		std::cout << std::endl;
+
 				
 		//std::this_thread::sleep_for(std::chrono::seconds(1));
 		
@@ -139,6 +137,12 @@ int main(int argc, char **argv)
 			std::cout << "Error: " << e.what() << std::endl;
 			continue;
 		}
+		
+		std::cout << "Found device Name = " << sensor_tag->get_name() << " ";
+		std::cout << "Address = " << sensor_tag->get_address() << " ";
+		std::cout << "Connected = " << sensor_tag->get_connected() << " ";
+		std::cout << "RSSI = " << sensor_tag->get_rssi() << " ";
+		std::cout << std::endl;		
 
 		//std::cout << "Discovered services: " << std::endl;
 		while (true) {
