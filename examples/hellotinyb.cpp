@@ -80,18 +80,18 @@ int main(int argc, char **argv)
 
 		//wait indefinitely for the device
 		while (true) { 
-			std::cout << "Discovered devices: " << std::endl;
+			//std::cout << "Discovered devices: " << std::endl;
 			/* Get the list of devices */
 			auto list = manager->get_devices();
 
 			for (auto it = list.begin(); it != list.end(); ++it) {
 
-				std::cout << "Class = " << (*it)->get_class_name() << " ";
+				/*std::cout << "Class = " << (*it)->get_class_name() << " ";
 				std::cout << "Path = " << (*it)->get_object_path() << " ";
 				std::cout << "Name = " << (*it)->get_name() << " ";
 				std::cout << "Connected = " << (*it)->get_connected() << " ";
 				std::cout << "RSSI = " << (*it)->get_rssi() << " ";
-				std::cout << std::endl;
+				std::cout << std::endl;*/
 				
 				if(argc >= 2)
 				{
@@ -110,10 +110,15 @@ int main(int argc, char **argv)
 				break;
 			/* If not, wait and try again */
 			std::this_thread::sleep_for(std::chrono::seconds(4));
-			std::cout << std::endl;
+			//std::cout << std::endl;
 		}
 		
-		std::cout << "RSSI = " << sensor_tag->get_rssi() << std::endl;
+		std::cout << "Found device Name = " << sensor_tag->get_name() << " ";
+		std::cout << "Address = " << sensor_tag->get_address() << " ";
+		std::cout << "Connected = " << sensor_tag->get_connected() << " ";
+		std::cout << "RSSI = " << sensor_tag->get_rssi() << " ";
+		std::cout << std::endl;
+				
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		
 
@@ -129,7 +134,7 @@ int main(int argc, char **argv)
 		/* Connect to the device and get the list of services exposed by it */
 		sensor_tag->connect();		
 
-		std::cout << "Discovered services: " << std::endl;
+		//std::cout << "Discovered services: " << std::endl;
 		while (true) {
 			/* Wait for the device to come online */
 			std::this_thread::sleep_for(std::chrono::seconds(4));
@@ -139,11 +144,11 @@ int main(int argc, char **argv)
 				continue;
 
 			for (auto it = list.begin(); it != list.end(); ++it) {
-				std::cout << "Class = " << (*it)->get_class_name() << " ";
+				/*std::cout << "Class = " << (*it)->get_class_name() << " ";
 				std::cout << "Path = " << (*it)->get_object_path() << " ";
 				std::cout << "UUID = " << (*it)->get_uuid() << " ";
 				std::cout << "Device = " << (*it)->get_device().get_object_path() << " ";
-				std::cout << std::endl;
+				std::cout << std::endl;*/
 
 				/* Search for the temperature service, by UUID */
 				if ((*it)->get_uuid() == "77880001-b5a3-f393-e0a9-150e24fcca8e")
@@ -160,14 +165,14 @@ int main(int argc, char **argv)
 
 		 /* get it's characteristics, by UUID again */
 		auto list = temperature_service->get_characteristics();
-		std::cout << "Discovered characteristics: " << std::endl;
+		//std::cout << "Discovered characteristics: " << std::endl;
 		for (auto it = list.begin(); it != list.end(); ++it) {
 
-			std::cout << "Class = " << (*it)->get_class_name() << " ";
+			/*std::cout << "Class = " << (*it)->get_class_name() << " ";
 			std::cout << "Path = " << (*it)->get_object_path() << " ";
 			std::cout << "UUID = " << (*it)->get_uuid() << " ";
 			std::cout << "Service = " << (*it)->get_service().get_object_path() << " ";
-			std::cout << std::endl;
+			std::cout << std::endl; */
 
 			if ((*it)->get_uuid() == "77880003-b5a3-f393-e0a9-150e24fcca8e")
 				temp_value = (*it).release();
@@ -198,7 +203,7 @@ int main(int argc, char **argv)
                 
                 //std::cout << b0 << " " << b1;
 
-                std::cout << "Heart beat: " << (b0 + (b1 << 8)) << std::endl;
+                std::cout << "Heart beat: " << (b0 + (b1 << 8)) << std::endl << std::endl;
                 
             }
         
