@@ -135,6 +135,7 @@ int main(int argc, char **argv)
 			sensor_tag->connect();		
 		} catch (std::exception &e) {
 			std::cout << "Error: " << e.what() << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(2));
 			continue;
 		}
 		
@@ -151,7 +152,7 @@ int main(int argc, char **argv)
 
 			auto list = sensor_tag->get_services();
 			if (list.empty())
-				continue;
+				break;
 
 			for (auto it = list.begin(); it != list.end(); ++it) {
 				/*std::cout << "Class = " << (*it)->get_class_name() << " ";
@@ -169,7 +170,9 @@ int main(int argc, char **argv)
 
 		if (temperature_service == nullptr) {
 			std::cout << "Could not find service 77880001-b5a3-f393-e0a9-150e24fcca8e" << std::endl;
-			return 1;
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+
+			continue;
 		}
 
 
@@ -194,7 +197,8 @@ int main(int argc, char **argv)
 
 		if (temp_config == nullptr || temp_value == nullptr /*|| temp_period == nullptr */) {
 			std::cout << "Could not find characteristics." << std::endl;
-			return 1;
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+
 		}
 			
 
@@ -229,7 +233,7 @@ int main(int argc, char **argv)
 			std::cout << "Error: " << e.what() << std::endl;
 		}
     
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
 
 	}
     return 0;
